@@ -1,0 +1,9 @@
+// ! 這三個是有順序性的
+// todo 引入 bootstrap 套用店數的方法
+    @import "~bootstrap/scss/functions";
+// todo 引入我們客製化的檔案
+    @import "./helpers/_variables";
+    @import "~bootstrap/scss/bootstrap";
+
+// todo 引入 daxhboard 的 scss
+    @import "./dashboard";
