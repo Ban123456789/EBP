@@ -12,20 +12,20 @@ export default {
       msg: 'Welcome to Your Vue.js App'
     }
   },
-  methods: {
-    signout() {
-      const vm = this;
-      const api = `${process.env.APIPATH}/logout`;
-        vm.$http.post(api).then( response => {
-          console.log(response.data);
-          if(response.data.success){
-            vm.$router.push('/login');
-          };
-        }).catch( response => {
-          console.log('fail');
-        });
-    },
-  },
+  // methods: {
+  //   signout() {
+  //     const vm = this;
+  //     const api = `${process.env.APIPATH}/logout`;
+  //       vm.$http.post(api).then( response => {
+  //         console.log(response.data);
+  //         if(response.data.success){
+  //           vm.$router.push('/login');
+  //         };
+  //       }).catch( response => {
+  //         console.log('fail');
+  //       });
+  //   },
+  // },
 }
 </script>
 

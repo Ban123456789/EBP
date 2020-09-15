@@ -4,7 +4,7 @@
                                             <!-- 這樣子的打法是直接將 model 直接打開，並不需要特定的條件 -->
             <!-- <button class="btn btn-primary" data-toggle="modal" data-target="#productModal">建立新產品</button> -->
                                             <!-- 這樣子打可以確定資料已經傳進來了，才開啟 model -->
-            <button class="btn btn-primary" @click="openModel">建立新產品</button>
+            <button class="btn btn-primary" @click="openModel(true)">建立新產品</button>
         </div>
         <table class="table mt-4">
             <thead>
@@ -14,7 +14,8 @@
                     <th width="120">原價</th>
                     <th width="120">售價</th>
                     <th width="100">是否啟用</th>
-                    <th width="80">編輯</th>
+                    <th width="75">編輯</th>
+                    <th width="75">刪除</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,12 +37,15 @@
                         <span v-else>未啟用</span>
                     </td>
                     <td>
-                        <button class="btn btn-outline-primary btn-sm">編輯</button>
+                        <button class="btn btn-outline-primary btn-sm" @click="openModel(false,item)">編輯</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-danger btn-sm" @click="cancelModel(item.id)">刪除</button>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <!-- Modal -->
+        <!-- Modal (新增與編輯)-->
         <div class="modal fade" id="productModal" tabindex="-1" role="dialog"
                 aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -138,6 +142,7 @@
             </div>
         </div>
         </div>
+        <!-- Model 刪除 -->
         <div class="modal fade" id="delProductModal" tabindex="-1" role="dialog"
         aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -155,8 +160,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-danger"
-                >確認刪除</button>
+                <button type="button" class="btn btn-danger" @click="cancel">確認刪除</button>
             </div>
             </div>
         </div>
@@ -172,9 +176,12 @@ export default {
         return{
             products: [],
             tempProduct: {},
+            isNew: false,
+            cancelId: '',
         }
     },
     methods: {
+    // todo 抓取後端資料
         getData() {
             // const api = 'https://vue-course-api.hexschool.io/api/corgi/products' //一般的寫法
             const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/products`; //運用環境變數的寫法
@@ -183,21 +190,39 @@ export default {
 
             this.$http.get(api).then((response) => {
                 // console.log(response.data);
-                // * 這裡如果用 push 的話，products 陣列內會再包一個陣列
-                vm.products = response.data.products;
+                // * 這裡如果直接用 vm.products.push(response.data.products) 的話，products 陣列內會再包一個陣列
+                // * 所以有兩種方法
+                // vm.products = response.data.products; //* 法一
+                response.data.products.forEach( item => {
+                    vm.products.push(item); //* 法二 
+                });
                 console.log(vm.products);
             }).catch(response => {
               console.log('fail');
             })
         },
-        openModel() {
-            $('#productModal').modal('show')
+    // todo 新增修改商品
+        openModel(isNew, item) {
+            if(isNew){
+                this.tempProduct = {};
+                this.isNew = true;
+            }else{
+                this.tempProduct = Object.assign({},item);
+                this.isNew = false;
+            };
+            $('#productModal').modal('show');
         },
         updateProduct() {
-            const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/admin/product`; //運用環境變數的寫法
+            let api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/admin/product`; //運用環境變數的寫法
             const vm = this;
+            let httpMethod = 'post';
 
-            this.$http.post(api,{data:vm.tempProduct}).then((response) => {
+            if(vm.isNew === false){
+                api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/admin/product/${vm.tempProduct.id}`
+                httpMethod = 'put'; 
+            }
+
+            this.$http[httpMethod](api, {data:vm.tempProduct}).then((response) => {
                 console.log(response.data);
                 if(response.data.success){
                     $('#productModal').modal('hide');
@@ -209,6 +234,21 @@ export default {
             }).catch(response => {
               console.log('fail');
             })
+        },
+    // todo 刪除商品
+        cancelModel(item) {
+            this.cancelId = item;
+            $('#delProductModal').modal('show');
+        },
+        cancel(e) {
+            const vm = this;
+            let api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/admin/product/${this.cancelId}`;
+            vm.$http.delete(api).then( response => {
+                if(response.data.success === true){
+                    vm.getData();
+                    $('#delProductModal').modal('hide');
+                }
+            });
         },
     },
     created() {
