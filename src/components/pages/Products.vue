@@ -50,7 +50,7 @@
             </tbody>
         </table>
         <!-- 分頁導覽 -->
-        <pagination :pages="pagination"></pagination>
+        <pagination :innerpage="pagination"></pagination>
         <!-- Modal (新增與編輯)-->
         <div class="modal fade" id="productModal" tabindex="-1" role="dialog"
                 aria-labelledby="exampleModalLabel" aria-hidden="true">
