@@ -1,5 +1,9 @@
 <template>
     <div>
+        <!-- loading 動圖 -->
+        <loading :active.sync="isLoading">
+        </loading>
+        <!-- 內容開始 -->
         <div class="text-right mt-4">
                                             <!-- 這樣子的打法是直接將 model 直接打開，並不需要特定的條件 -->
             <!-- <button class="btn btn-primary" data-toggle="modal" data-target="#productModal">建立新產品</button> -->
@@ -33,7 +37,7 @@
                         {{item.price}}
                     </td>
                     <td>
-                        <span v-if="item.is_inable" class="text-success">啟用</span>
+                        <span v-if="item.is_enabled === 1" class="text-success">啟用</span>
                         <span v-else>未啟用</span>
                     </td>
                     <td>
@@ -45,6 +49,8 @@
                 </tr>
             </tbody>
         </table>
+        <!-- 分頁導覽 -->
+        <pagination :pages="pagination"></pagination>
         <!-- Modal (新增與編輯)-->
         <div class="modal fade" id="productModal" tabindex="-1" role="dialog"
                 aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -64,16 +70,17 @@
                     <div class="form-group">
                     <label for="image">輸入圖片網址</label>
                     <input type="text" class="form-control" id="image"
-                        placeholder="請輸入圖片連結">
+                        placeholder="請輸入圖片連結"
+                        v-model="tempProduct.imageUrl">
                     </div>
                     <div class="form-group">
                     <label for="customFile">或 上傳圖片
-                        <i class="fas fa-spinner fa-spin"></i>
+                        <i class="fas fa-spinner fa-spin" v-if="loadingImg"></i>
                     </label>
                     <input type="file" id="customFile" class="form-control"
-                        ref="files">
+                        ref="files" @change="uploadFile">
                     </div>
-                    <img img="https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=828346ed697837ce808cae68d3ddc3cf&auto=format&fit=crop&w=1350&q=80"
+                    <img :src="tempProduct.imageUrl"
                     class="img-fluid" alt="">
                 </div>
                 <div class="col-sm-8">
@@ -125,8 +132,8 @@
                         <input class="form-check-input" type="checkbox"
                         id="is_enabled"
                         v-model="tempProduct.is_enabled"
-                        :true-value="1"
-                        :false-value="0">
+                        :true-value='1'
+                        :false-value='0'>
                         <label class="form-check-label" for="is_enabled">
                         是否啟用
                         </label>
@@ -169,7 +176,13 @@
 </template>
 
 <script>
+// todo 局部註冊
 import $ from 'jquery';
+// todo 全域註冊(在 main.js 註冊)，就可以所有 .vue 檔使用
+// import jquery from 'jquery';
+// 將 jQuey 以 $ 字號方式，掛載到 window 下
+// window.$ = jquery;
+import pagination from '../Pagination'
 
 export default {
     data() {
@@ -178,7 +191,13 @@ export default {
             tempProduct: {},
             isNew: false,
             cancelId: '',
+            isLoading: false,
+            loadingImg: false,
+            pagination: {},
         }
+    },
+    components:{
+        pagination
     },
     methods: {
     // todo 抓取後端資料
@@ -188,6 +207,7 @@ export default {
             // todo 上方的 proces.env 在 webpack.dev.conf.js 內部的 plug 有預設好路徑
             const vm = this;
 
+            this.isLoading = true;
             this.$http.get(api).then((response) => {
                 // console.log(response.data);
                 // * 這裡如果直接用 vm.products.push(response.data.products) 的話，products 陣列內會再包一個陣列
@@ -196,7 +216,10 @@ export default {
                 response.data.products.forEach( item => {
                     vm.products.push(item); //* 法二 
                 });
-                console.log(vm.products);
+                this.isLoading = false;
+                console.log(response.data);
+            // todo 將分頁導覽的資料存進去
+                vm.pagination = response.data.pagination;
             }).catch(response => {
               console.log('fail');
             })
@@ -207,6 +230,7 @@ export default {
                 this.tempProduct = {};
                 this.isNew = true;
             }else{
+                // *因為物件有傳參考特性，所以利用 Object.assin 來將要存入的物件先存在新的空物件上，再存入想存的位置
                 this.tempProduct = Object.assign({},item);
                 this.isNew = false;
             };
@@ -217,38 +241,75 @@ export default {
             const vm = this;
             let httpMethod = 'post';
 
-            if(vm.isNew === false){
-                api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/admin/product/${vm.tempProduct.id}`
-                httpMethod = 'put'; 
-            }
-
-            this.$http[httpMethod](api, {data:vm.tempProduct}).then((response) => {
-                console.log(response.data);
-                if(response.data.success){
-                    $('#productModal').modal('hide');
-                    vm.getData();
-                }else{
-                    alert("新增失敗!");
-                    $('#productModal').modal('hide');
+                if(vm.isNew === false){
+                    api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/admin/product/${vm.tempProduct.id}`
+                    httpMethod = 'put'; 
                 }
-            }).catch(response => {
-              console.log('fail');
-            })
+
+            // todo 這邊要記得將 products 陣列清空，因為等等會在 getData 一次
+                vm.products = [];
+                this.$http[httpMethod](api, {data:vm.tempProduct}).then((response) => {
+                    console.log(response.data);
+                    if(response.data.success){
+                        $('#productModal').modal('hide');
+                        vm.getData();
+                    }else{
+                        alert("新增失敗!");
+                        $('#productModal').modal('hide');
+                    }
+                }).catch(response => {
+                console.log('fail');
+                })
         },
     // todo 刪除商品
         cancelModel(item) {
             this.cancelId = item;
             $('#delProductModal').modal('show');
         },
-        cancel(e) {
+        cancel() {
             const vm = this;
             let api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/admin/product/${this.cancelId}`;
-            vm.$http.delete(api).then( response => {
-                if(response.data.success === true){
-                    vm.getData();
-                    $('#delProductModal').modal('hide');
-                }
-            });
+
+            // todo 這邊要記得將 products 陣列清空，因為等等會在 getData 一次
+                vm.products = [];
+                vm.$http.delete(api).then( response => {
+                    if(response.data.success === true){
+                        vm.getData();
+                        $('#delProductModal').modal('hide');
+                    }
+                });
+        },
+    // todo 上傳照片
+        uploadFile() {
+            // console.log(this.$refs.files.files);
+            let uploadedFile = this.$refs.files.files[0];
+            const vm = this;
+            this.loadingImg = true;
+            let formData = new FormData();
+                formData.append('file-to-upload', uploadedFile);
+            let url = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/admin/upload`;
+                vm.$http.post(url, formData, {
+                    headers:{
+                         'Content-Type':"multipart/form-data"
+                    }
+                }).then( response => {
+                    console.log(response.data);
+                    if(response.data.success){
+
+                        // todo 下面兩行 vm.tempProduct.imageUrl(直接在 tempProduct 新增一個 imageUrl 屬性，然後將 response.data.imageUrl 存進去)
+                        // * 但是用 console 去看會發現少了 (get imageUrl 和 set imgUrl) 這兩行，於是你在元件寫好雙向綁定也沒用
+                        // vm.tempProduct.imageUrl = response.data.imageUrl;
+                        // console.log(vm.tempProduct);
+
+                        // todo 所以才將 get 和 set 強制寫入 [vm.$set(array, index, value)] 參考文件:https://ithelp.ithome.com.tw/articles/10206422
+                        vm.$set(vm.tempProduct, 'imageUrl', response.data.imageUrl);
+                        console.log(vm.tempProduct);
+
+                        this.loadingImg = false;
+                    }else{
+                        vm.$bus.$emit('message:push', response.data.message, 'danger');
+                    }
+                });
         },
     },
     created() {

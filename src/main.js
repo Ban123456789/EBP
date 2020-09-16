@@ -7,13 +7,19 @@ import VueAxios from 'vue-axios'
 // * 這裡因為不需要用到名字，所以直接用單引號來顯示來源即可(因為bootstrap有為webpack做優化，所以可以把來源直接輸入bootstrap就好 https://getbootstrap.com/docs/4.0/getting-started/webpack/)
 // * 因為 bootstrap 很仰賴 jquery 的，所以要連同 jquery 一起載入
 import 'bootstrap'
+import Loading from 'vue-loading-overlay'
+import 'vue-loading-overlay/dist/vue-loading.css'
 
 // * 通常上方都引入第三方套件，下方都引入自訂義的
 import App from './App'
 import router from './router'
+import './bus'
 
 Vue.config.productionTip = false;
 Vue.use(VueAxios, axios);
+
+// todo 全域設定，全部元件都可以使用
+Vue.component('Loading',Loading);
 
 axios.defaults.withCredentials = true;
 
