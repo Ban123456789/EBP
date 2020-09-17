@@ -1,8 +1,8 @@
 <template>
 <div>
+    <navbar/>
     <div class="container-fluid">
         <alert/>
-        <navbar/>
         <div class="row">
             <sidebar/>
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">

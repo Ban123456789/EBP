@@ -4,6 +4,7 @@ import Router from 'vue-router'
 import Login from '../components/pages/login'
 import Dashboard from '../components/Dashboard'
 import Products from '../components/pages/Products'
+import CustomOrder from '../components/pages/CustomOrder'
 
 Vue.use(Router);
 
@@ -26,6 +27,7 @@ export default new Router({
       name: 'Login',
       component: Login
     },
+  // * Dashboard整個畫面的路徑 + 產品列表的路徑
     {
       path: '/admin',
       name: 'Dashboard',
@@ -39,5 +41,18 @@ export default new Router({
         },
       ],
     },
+  // * 模擬訂單路徑
+    {
+      path: '/',
+      name: 'Dashboard',
+      component: Dashboard,
+      children: [
+        {
+          path: '/custom_order',
+          name: 'CustomOrder',
+          component: CustomOrder
+        }
+      ]
+    }
   ]
 })
