@@ -14,12 +14,16 @@ import 'vue-loading-overlay/dist/vue-loading.css'
 import App from './App'
 import router from './router'
 import './bus'
+import Currency from './components/filter/Currency'
 
 Vue.config.productionTip = false;
 Vue.use(VueAxios, axios);
 
 // todo 全域設定，全部元件都可以使用
 Vue.component('Loading',Loading);
+
+// todo 全域設定，讓所有元件都可以使用 filters
+Vue.filter('currency',Currency);
 
 axios.defaults.withCredentials = true;
 

@@ -31,10 +31,10 @@
                         {{item.title}}
                     </td>
                     <td class="text-right">
-                        {{item.origin_price}}
+                        {{item.origin_price | currency}}
                     </td>
                     <td class="text-right">
-                        {{item.price}}
+                        {{item.price | currency}}
                     </td>
                     <td>
                         <span v-if="item.is_enabled === 1" class="text-success">啟用</span>
@@ -50,7 +50,7 @@
             </tbody>
         </table>
         <!-- 分頁導覽 -->
-        <pagination :innerpage="pagination"></pagination>
+        <pagination :innerpage="pagination" @childChange="getData"></pagination>
         <!-- Modal (新增與編輯)-->
         <div class="modal fade" id="productModal" tabindex="-1" role="dialog"
                 aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -201,20 +201,28 @@ export default {
     },
     methods: {
     // todo 抓取後端資料
-        getData() {
+        // * 這裡可以用 ES6 預設值的方式，讓他在沒有帶入參數時，預設帶1
+        getData(page = 1) {
             // const api = 'https://vue-course-api.hexschool.io/api/corgi/products' //一般的寫法
-            const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/products`; //運用環境變數的寫法
+            const api = `${process.env.APIPATH}/api/${process.env.CUSTOMPATH}/products?page=${page}`; //運用環境變數的寫法
             // todo 上方的 proces.env 在 webpack.dev.conf.js 內部的 plug 有預設好路徑
             const vm = this;
 
             this.isLoading = true;
             this.$http.get(api).then((response) => {
+                vm.products = [];
                 // console.log(response.data);
                 // * 這裡如果直接用 vm.products.push(response.data.products) 的話，products 陣列內會再包一個陣列
                 // * 所以有兩種方法
                 // vm.products = response.data.products; //* 法一
-                response.data.products.forEach( item => {
-                    vm.products.push(item); //* 法二 
+                response.data.products.forEach( item => {//* 法二 
+                    if(item.origin_price == ''){
+                        item.origin_price == 0;  
+                    }
+                    if(item.price == ''){
+                        item.price == 0;
+                    }
+                    vm.products.push(item); 
                 });
                 this.isLoading = false;
                 console.log(response.data);
