@@ -5,6 +5,7 @@ import Login from '../components/pages/login'
 import Dashboard from '../components/Dashboard'
 import Products from '../components/pages/Products'
 import CustomOrder from '../components/pages/CustomOrder'
+import Coupon from '../components/pages/Coupon'
 
 Vue.use(Router);
 
@@ -51,6 +52,19 @@ export default new Router({
           path: '/custom_order',
           name: 'CustomOrder',
           component: CustomOrder
+        }
+      ]
+    },
+    // * 優惠券路徑
+    {
+      path: '/',
+      name: 'Dashboard',
+      component: Dashboard,
+      children: [
+        {
+          path: '/coupon',
+          name: 'Coupon',
+          component: Coupon
         }
       ]
     }

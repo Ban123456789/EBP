@@ -99,7 +99,7 @@
                     <div class="form-group col-md-6">
                         <label for="price">單位</label>
                         <input type="unit" class="form-control" id="unit"
-                        placeholder="請輸入單位">
+                        placeholder="請輸入單位" v-model="tempProduct.unit">
                     </div>
                     </div>
 
@@ -120,12 +120,12 @@
                     <div class="form-group">
                     <label for="description">產品描述</label>
                     <textarea type="text" class="form-control" id="description"
-                        placeholder="請輸入產品描述"></textarea>
+                        placeholder="請輸入產品描述" v-model="tempProduct.description"></textarea>
                     </div>
                     <div class="form-group">
                     <label for="content">說明內容</label>
                     <textarea type="text" class="form-control" id="content"
-                        placeholder="請輸入產品說明內容"></textarea>
+                        placeholder="請輸入產品說明內容" v-model="tempProduct.content"></textarea>
                     </div>
                     <div class="form-group">
                     <div class="form-check">
@@ -216,11 +216,11 @@ export default {
                 // * 所以有兩種方法
                 // vm.products = response.data.products; //* 法一
                 response.data.products.forEach( item => {//* 法二 
-                    if(item.origin_price == ''){
-                        item.origin_price == 0;  
+                    if(!item.origin_price){
+                        item.origin_price = '0';  
                     }
-                    if(item.price == ''){
-                        item.price == 0;
+                    if(!item.price){
+                        item.price = '0';
                     }
                     vm.products.push(item); 
                 });

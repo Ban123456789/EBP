@@ -9,19 +9,27 @@
           </a>
         </h6>
         <ul class="nav flex-column mb-2">
-          <li class="nav-item" @click="text='產品列表'">
-            <router-link class="nav-link font-weight-bolder" to="/admin/products" :class="{active:text === '產品列表'}">
-              <i class="fas fa-box-open"></i>
-              產品列表
-            </router-link>
-            <router-link class="nav-link font-weight-bolder" to="/admin/products">
-              <i class="fas fa-list-alt"></i>
-              訂單列表
-            </router-link>
-            <router-link class="nav-link font-weight-bolder" to="/admin/products">
-              <i class="fas fa-ticket-alt"></i>
-              優惠券
-            </router-link>
+          <li class="nav-item">
+            <div @click="text='產品列表'">
+              <router-link class="nav-link font-weight-bolder" to="/admin/products" :class="{active:text === '產品列表'}">
+                <i class="fas fa-box-open"></i>
+                產品列表
+              </router-link>
+            </div>
+            
+            <div @click="text='訂單列表'">
+              <router-link class="nav-link font-weight-bolder" to="/admin/products" :class="{active:text === '訂單列表'}">
+                <i class="fas fa-list-alt"></i>
+                訂單列表
+              </router-link>
+            </div>
+            
+            <div @click="text='優惠券'">
+              <router-link class="nav-link font-weight-bolder" to="/coupon" :class="{active:text === '優惠券'}">
+                <i class="fas fa-ticket-alt"></i>
+                優惠券
+              </router-link>
+            </div>
           </li>
         </ul>
 
